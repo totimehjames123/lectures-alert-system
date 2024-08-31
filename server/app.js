@@ -20,6 +20,7 @@ import allSchedules from './routes/allSchedules.js';
 import deleteUser from './routes/deleteUser.js';
 import allNotifications from './routes/allNotifications.js';
 import markAllNotificationsRead from './routes/markAllNotificationsRead.js';
+import sendCustomNotification from './routes/sendCustomNotification.js';
 
 // Create an Express application
 const app = express();
@@ -50,6 +51,7 @@ app.put('/update-lecture-status/:id', updateLectureStatus);
 app.delete('/delete-schedule/:id', deleteSchedule);
 app.get('/all-schedules', allSchedules);
 app.post('/mark-all-notifications-read', markAllNotificationsRead)
+app.post('/send-custom-notification', sendCustomNotification)
 
 
 // Start the server

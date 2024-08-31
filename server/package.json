@@ -12,5 +12,13 @@
     "nodemailer": "^6.9.14",
     "nodemon": "^3.1.4"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "scripts": {
+    "start": "concurrently \"nodemon app.js\" \"nodemon scheduler.js\""
+  }
+  
+  
 }
