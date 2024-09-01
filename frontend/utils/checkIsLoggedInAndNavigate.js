@@ -19,7 +19,7 @@ export default function checkIsLoggedInAndNavigate(passedPath, failedPath) {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/verify-user`, { _id, indexNumber });
 
             if (response.status === 200) {
-              await storeCurrentUser(response.data.user);
+              // await storeCurrentUser(response.data.user);
               navigation.navigate(passedPath);
             } else {
               console.log(response.data.message);

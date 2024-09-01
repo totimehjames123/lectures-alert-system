@@ -6,7 +6,7 @@ import FormInput from '../components/FormInput';
 import TimePicker from '../components/TimePicker';
 import CommentField from '../components/CommentField';
 import AlertMessage from '../components/AlertMessage';
-import { classes } from '../utils/constants';
+import { classes, days } from '../utils/constants';
 import getCurrentUser from '../utils/getCurrentUser';
 import { useRoute } from '@react-navigation/native';
 import SearchablePicker from '../components/SearchablePicker';
@@ -131,19 +131,27 @@ const ScheduleLecture = ({ navigation }) => {
             value={courseName}
             label="Course Name"
           />
-          <FormInput
+          {/* <FormInput
             icon="calendar-outline"
             moreClass="mb-2"
             onChangeText={setDay}
             value={day}
             label="Day"
-          />
+          /> */}
           <FormInput
             icon="location-outline"
             moreClass="mb-2"
             onChangeText={setVenue}
             value={venue}
             label="Venue"
+          />
+          <SearchablePicker
+            icon="calendar-outline"
+            label="Day"
+            options={days}
+            selectedValue={setDay}
+            onSelect={setDay}
+            moreClass={'mb-2'}
           />
           <SearchablePicker
             icon="grid-outline"

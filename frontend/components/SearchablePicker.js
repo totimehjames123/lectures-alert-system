@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons
 
-const SearchablePicker = ({ label, options, selectedValue, onSelect, moreClass }) => {
+const SearchablePicker = ({ label, options, selectedValue, onSelect, moreClass, icon="grid-outline" }) => {
   const defaultOption = options.find(option => option.key === selectedValue);
 
   return (
@@ -16,7 +16,7 @@ const SearchablePicker = ({ label, options, selectedValue, onSelect, moreClass }
         searchPlaceholder={`Search for a ${label.toLowerCase()}`}
         placeholder={
           <View className="flex-row items-center gap-x-1">
-            <Ionicons name="grid-outline" size={20} style={{color: "#6B7280"}}/>
+            <Ionicons name={icon} size={20} style={{color: "#6B7280"}}/>
             <Text className="text-gray-400" style={{fontFamily: "Poppins-Regular"}}>  Select {label}</Text>
         </View>
 
