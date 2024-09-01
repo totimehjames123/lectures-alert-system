@@ -57,7 +57,7 @@ const UpcomingLecturesContainer = () => {
     fetchUpcomingLectures();
 
     // Poll every hour
-    interval = setInterval(fetchUpcomingLectures, 3600000);
+    interval = setInterval(fetchUpcomingLectures, 1000);
 
     // Clear interval on component unmount
     return () => clearInterval(interval);

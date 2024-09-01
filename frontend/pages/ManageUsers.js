@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, ScrollView, Text, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import UserCard from '../components/UserCard';
-import FormSelect from '../components/FormSelect';
 import SearchInput from '../components/SearchInput';
 import ConfirmationPopup from '../components/ConfirmationPopup';
 import EditUserModal from '../components/EditUserModal';
@@ -27,22 +26,29 @@ const ManageUsers = () => {
     { label: 'Lecturer', value: 'Lecturer' },
   ];
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-users`);
-        setUsers(response.data.users);
-      } catch (error) {
-        setAlertType('error');
-        setAlertMessage(error.response?.data?.message || 'Failed to fetch users');
-        setAlertVisible(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-users`);
+      setUsers(response.data.users);
+    } catch (error) {
+      setAlertType('error');
+      setAlertMessage(error.response?.data?.message || 'Failed to fetch users');
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    // Fetch users initially
+    fetchUsers();
+
+    // Set up an interval to fetch users every second
+    const intervalId = setInterval(fetchUsers, 1000);
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [fetchUsers]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch = user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||

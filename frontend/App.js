@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
-import Stacks from './components/Stacks';
+import MyStacks from './components/MyStacks';
 import { Provider } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppProvider } from './context/AppContext';
 
 export default function App() {
 
@@ -23,14 +25,17 @@ export default function App() {
   }
 
   return (
-    <>
-      <Provider>
-        <NavigationContainer>
-          <Stacks />
-          <Toast />
-        </NavigationContainer>
-      </Provider>
-    </> 
+    <SafeAreaProvider>
+      <AppProvider>
+        <Provider>
+          <NavigationContainer>
+            <MyStacks>
+              <Toast />
+            </MyStacks>
+          </NavigationContainer>
+        </Provider>
+      </AppProvider>
+    </SafeAreaProvider> 
   );
 }
 

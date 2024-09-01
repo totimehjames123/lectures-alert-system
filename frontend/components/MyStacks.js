@@ -26,7 +26,7 @@ import AllLectures from "../pages/AllLectures";
 
 const Stack = createStackNavigator();
 
-function Stacks() {
+function MyStacks() {
   const [isVerified, setIsVerified] = useState(null); // State to hold verification status
 
   useEffect(() => {
@@ -43,7 +43,7 @@ function Stacks() {
     checkVerification();
 
     // Set up polling every second
-    const interval = setInterval(checkVerification, 3600000);
+    const interval = setInterval(checkVerification, 1000);
 
     // Clear interval on component unmount
     return () => clearInterval(interval);
@@ -58,20 +58,18 @@ function Stacks() {
     <>
     <CheckLoginAndNavigate passedPath={"BottomTabNavigation"} failedPath={"OnboardingScreen"}/>
     <Stack.Navigator screenOptions={{ headerTitleStyle: { fontFamily: 'Poppins-Regular' } }} >
-      { (
-        <>
-          <Stack.Screen
-            name="OnboardingScreen"
-            component={OnboardingScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{ headerTitleAlign: 'center', headerTitle: '' }}
-          />
-        </>
-      )}
+     
+      <Stack.Screen
+        name="OnboardingScreen"
+        component={OnboardingScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Login"
+        component={Login}
+        options={{ headerTitleAlign: 'center', headerTitle: '' }}
+      />
+      
 
       <Stack.Screen
         name="BottomTabNavigation"
@@ -135,11 +133,11 @@ function Stacks() {
         component={RescheduleLecture}
         options={{ headerTitle: "Reschedule Lecture",}}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="Profile"
         component={Profile}
         options={{ headerTitle: 'My Profile' }}
-      /> */}
+      />
       <Stack.Screen
         name="LecturesCalendar"
         component={LecturesCalendar}
@@ -151,4 +149,4 @@ function Stacks() {
   );
 }
 
-export default Stacks;
+export default MyStacks;

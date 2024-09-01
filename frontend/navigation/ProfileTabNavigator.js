@@ -34,13 +34,14 @@ export default function ProfileStackNavigator() {
 
               // Show success message
               setAlertMessage('Successfully logged out');
-              setAlertType('success');
+              setAlertType('success')
               setAlertVisible(true);
 
               // Wait for 2 seconds before navigating
               setTimeout(() => {
                 navigation.navigate('Login');
               }, 2000);
+              navigation.navigate('Login');
             } catch (error) {
               console.error('Failed to log out', error);
               setAlertMessage('Failed to log out');

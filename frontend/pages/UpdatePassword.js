@@ -57,7 +57,7 @@ const UpdatePassword = ({ navigation }) => {
         setAlertVisible(false);
         // Re-verify user after clearing storage
         navigation.navigate('Login');
-      }, 2000); // 7-second delay before navigation
+      }, 2000); 
 
     } else {
       setAlertType('error');

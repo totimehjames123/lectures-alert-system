@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, Image } from 'react-native';
 import axios from 'axios';
 import NotificationsCard from '../components/NotificationsCard';
@@ -12,9 +12,31 @@ const Notifications = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userParams, setUserParams] = useState(null);
+  const intervalRef = useRef(null);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      if (!userParams) return;
+
+      const { role, classValue, indexNumber } = userParams;
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-notifications`, {
+        params: { role, classValue, indexNumber }
+      });
+
+      const data = response.data;
+      if (Array.isArray(data)) {
+        setNotifications(data);
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+      // Don't set error state here to avoid disrupting the UI on every failed fetch
+    }
+  }, [userParams]);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const initializeUser = async () => {
       try {
         const currentUser = await getCurrentUser();
         if (!currentUser) {
@@ -23,26 +45,28 @@ const Notifications = ({ navigation }) => {
 
         const { role, classValue, indexNumber, _id } = currentUser;
         setUserParams({ role, classValue, indexNumber, _id });
-
-        const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-notifications`, {
-          params: { role, classValue, indexNumber }
-        });
-
-        const data = response.data;
-        if (Array.isArray(data)) {
-          setNotifications(data);
-        } else {
-          throw new Error('Invalid response format');
-        }
+        setLoading(false);
       } catch (err) {
-        setError('Failed to fetch notifications');
-      } finally {
+        setError('Failed to initialize user');
         setLoading(false);
       }
     };
 
-    fetchNotifications();
+    initializeUser();
   }, []);
+
+  useEffect(() => {
+    if (userParams) {
+      fetchNotifications();
+      intervalRef.current = setInterval(fetchNotifications, 1000);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [userParams, fetchNotifications]);
 
   const handleNotificationRead = async (id) => {
     try {
@@ -64,7 +88,7 @@ const Notifications = ({ navigation }) => {
         )
       );
     } catch (err) {
-      setError('Failed to mark notification as read');
+      console.error('Failed to mark notification as read:', err);
     }
   };
 
@@ -90,20 +114,12 @@ const Notifications = ({ navigation }) => {
     }
   };
 
-  // Use useFocusEffect to call markAllAsRead when navigating away from this screen
   useFocusEffect(
     useCallback(() => {
       return () => {
         markAllAsRead();
       };
     }, [userParams])
-  );
-
-  const unreadNotifications = notifications.filter(notification => 
-    !notification.readBy.includes(userParams?._id)
-  );
-  const readNotifications = notifications.filter(notification => 
-    notification.readBy.includes(userParams?._id)
   );
 
   if (loading) {
@@ -114,12 +130,18 @@ const Notifications = ({ navigation }) => {
     return <Text className="text-red-500 text-center mt-3" style={{fontFamily: 'Poppins-Regular'}}>{error}</Text>;
   }
 
+  const unreadNotifications = notifications.filter(notification => 
+    !notification.readBy.includes(userParams?._id)
+  );
+  const readNotifications = notifications.filter(notification => 
+    notification.readBy.includes(userParams?._id)
+  );
+
   return (
     <ScrollView contentContainerStyle={{ paddingVertical: 10 }} style={{ backgroundColor: 'white', flex: 1 }}>
       {unreadNotifications.length === 0 && readNotifications.length === 0 ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Image source={require('../assets/icon.png')} style={{ width: 150, height: 150 }} />
-          <Text style={{ color: 'gray', textAlign: 'center', marginTop: 16 }}>You have no notifications</Text>
+          <Text style={{ color: 'gray', textAlign: 'center', marginTop: 16, fontFamily: "Poppins-Regular" }}>You have no notifications</Text>
         </View>
       ) : (
         <>
@@ -133,7 +155,7 @@ const Notifications = ({ navigation }) => {
                   title={notification.title || notification.action}
                   description={notification.description}
                   period={formatRelativeTime(notification.date)}
-                  isRead={false} // Mark as unread in UI
+                  isRead={false}
                   onPress={() => handleNotificationRead(notification._id)}
                 />
               ))}
@@ -150,7 +172,7 @@ const Notifications = ({ navigation }) => {
                   title={notification.title || notification.action}
                   description={notification.description}
                   period={formatRelativeTime(notification.date)}
-                  isRead={true} // Mark as read in UI
+                  isRead={true}
                 />
               ))}
             </>

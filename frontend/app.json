@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "lectures-alert-system",
-    "slug": "lectures-alert-system",
+    "name": "LectAlerts",
+    "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,7 +25,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "ae56ad09-a0ef-4fce-9f03-31ee88dec85b"
+        "projectId": "07b85b2c-b815-4cc2-b71d-ce2714bafb9a"
       }
     }
   }

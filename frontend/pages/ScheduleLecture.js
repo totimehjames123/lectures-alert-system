@@ -86,7 +86,11 @@ const ScheduleLecture = ({ navigation }) => {
         setAlertType('success');
         setAlertMessage(response.data.message || "Lecture scheduled successfully");
         setAlertVisible(true);
-        // navigation.navigate('Notifications');
+        setTimeout(() => {
+          setAlertVisible(false);
+          // Re-verify user after clearing storage
+          navigation.goBack()
+        }, 2000); 
       } else {
         setAlertType('error');
         setAlertMessage(response.data.message || 'Failed to schedule lecture');

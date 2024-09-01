@@ -3,6 +3,7 @@ import { ScrollView, ActivityIndicator, View } from 'react-native';
 import CountCards from './CountCards';
 import getCurrentUser from '../utils/getCurrentUser';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 const CountCardContainer = () => {
   const [role, setRole] = useState(null);
@@ -10,6 +11,8 @@ const CountCardContainer = () => {
   const [indexNumber, setIndexNumber] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cardData, setCardData] = useState([]);
+
+  const navigation = useNavigation()
 
   // Fetch all students
   const getStudents = async () => {
@@ -76,6 +79,7 @@ const CountCardContainer = () => {
           textColor: 'text-yellow-500',
           iconColor: '#FBBF24',
           iconName: 'calendar-outline',
+          link: 'SearchStack'
         },
         {
           id: '2',
@@ -85,6 +89,7 @@ const CountCardContainer = () => {
           textColor: 'text-violet-400',
           iconColor: '#A78BFA',
           iconName: 'people-outline',
+          link: 'ManageUsers'
         },
         {
           id: '3',
@@ -94,6 +99,7 @@ const CountCardContainer = () => {
           textColor: 'text-gray-500',
           iconColor: '#6B7280',
           iconName: 'school-outline',
+          link: 'ManageUsers'
         },
         {
           id: '4',
@@ -103,6 +109,7 @@ const CountCardContainer = () => {
           textColor: 'text-blue-500',
           iconColor: '#3B82F6',
           iconName: 'time-outline',
+          link: 'SearchStack'
         },
         {
           id: '5',
@@ -112,6 +119,7 @@ const CountCardContainer = () => {
           textColor: 'text-red-500',
           iconColor: '#EF4444',
           iconName: 'close-circle-outline',
+          link: 'SearchStack'
         },
       ];
 
@@ -138,7 +146,7 @@ const CountCardContainer = () => {
 
   useEffect(() => {
     fetchUserDataAndScheduleData();
-    const interval = setInterval(fetchUserDataAndScheduleData, 3600000);
+    const interval = setInterval(fetchUserDataAndScheduleData, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -165,6 +173,7 @@ const CountCardContainer = () => {
           textColor={card.textColor}
           iconColor={card.iconColor}
           iconName={card.iconName}
+          onPress={() => navigation.navigate(card.link)}
         />
       ))}
     </ScrollView>

@@ -48,7 +48,7 @@ const NotificationsCard = ({ action , title, description, period, isRead }) => {
               numberOfLines={isExpanded ? undefined : 1}
               style={{ fontFamily: 'Poppins-Regular' }}
             >
-              {title}
+              {title == "Other" ? "Customized" : title}
             </Text>
             <Text
               className="text-gray-500 text-xs"

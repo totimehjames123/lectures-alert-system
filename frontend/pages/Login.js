@@ -40,7 +40,7 @@ const Login =  ({ navigation }) => {
       const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/login`, {
         indexNumber,
         password,
-        expoPushToken: (await getExpoPushToken()).toString()
+        expoPushToken: (await getExpoPushToken()).toString() 
       });
 
       if (response.status === 200) {
@@ -52,11 +52,12 @@ const Login =  ({ navigation }) => {
         await storeCurrentUser(response.data.user)
 
         const user = await getCurrentUser();
+        console.log(user)
 
         // Navigate to Home or another screen
         navigation.navigate('BottomTabNavigation');
       } else {
-        setAlertType('error');
+        setAlertType('error'); 
         setAlertMessage(response.data.message || 'Login failed');
         setAlertVisible(true);
       }
@@ -81,8 +82,9 @@ const Login =  ({ navigation }) => {
             moreClass={'mb-2'}
             onChangeText={setIndexNumber}
             value={indexNumber}
-            label='Index Number'
+            label={'Index Number'}
           />
+          
           <FormInput
             icon={'lock-closed-outline'}
             moreClass={'mb-2'}

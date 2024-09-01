@@ -1,19 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text } from 'react-native';
 import { Agenda } from 'react-native-calendars';
 import axios from 'axios';
 import getInitials from '../utils/getInitials';
 import getCurrentUser from '../utils/getCurrentUser';
 
-// Helper function to generate random color
-const getRandomColor = () => {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-};
+const colorList = ['#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#6B7280', '#EC4899']; // blue-500, green-500, yellow-500, indigo-500, gray-500, pink-500
 
 // Helper function to format time
 const formatTime = (timeString) => {
@@ -24,40 +16,47 @@ const formatTime = (timeString) => {
 const LecturesCalendar = () => {
   const [scheduleData, setScheduleData] = useState({});
 
-  useEffect(() => {
-    const fetchSchedules = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        if (!currentUser) {
-          console.log("No user data found");
-          return;
-        }
-
-        const { role, indexNumber, classValue } = currentUser;
-
-        const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-schedules`, {
-          params: {
-            role: role,
-            classValue: role === 'Student' ? classValue : undefined, // Only include classValue if the role is 'Student'
-            lecturerIndexNumber: role === 'Lecturer' ? indexNumber : undefined, // Only include lecturerIndexNumber if the role is 'Lecturer'
-          },
-        });
-
-        const lectures = response.data; // Assuming your backend returns an array of lectures
-        setScheduleData(generateEvents(lectures));
-      } catch (error) {
-        console.error('Error fetching schedules:', error);
+  const fetchSchedules = useCallback(async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        console.log("No user data found");
+        return;
       }
-    };
 
-    fetchSchedules();
+      const { role, indexNumber, classValue } = currentUser;
+
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-schedules`, {
+        params: {
+          role: role,
+          classValue: role === 'Student' ? classValue : undefined, // Only include classValue if the role is 'Student'
+          lecturerIndexNumber: role === 'Lecturer' ? indexNumber : undefined, // Only include lecturerIndexNumber if the role is 'Lecturer'
+        },
+      });
+
+      const lectures = response.data; // Assuming your backend returns an array of lectures
+      setScheduleData(generateEvents(lectures));
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+    }
   }, []);
+
+  useEffect(() => {
+    // Fetch schedules initially
+    fetchSchedules();
+
+    // Set up an interval to fetch schedules every second
+    const intervalId = setInterval(fetchSchedules, 1000);
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [fetchSchedules]);
 
   // Helper function to generate events for the Agenda component
   const generateEvents = (lectures) => {
     const events = {};
 
-    lectures.forEach((lecture) => {
+    lectures.forEach((lecture, index) => {
       const { day, courseName, startTime, endTime, classValue, venue, lecturerName } = lecture;
       let date = new Date();
 
@@ -73,6 +72,7 @@ const LecturesCalendar = () => {
             classValue,
             venue,
             lecturerName,
+            index, // Pass the index to maintain order for color assignment
           });
         }
       }
@@ -81,9 +81,9 @@ const LecturesCalendar = () => {
     return events;
   };
 
-  const renderItem = (item) => {
-    const randomColor = getRandomColor(); // Generate random color for each item
-  
+  const renderItem = (item, index) => {
+    const color = colorList[index % colorList.length]; // Cycle through the colors in order
+
     return (
       <View className="bg-white p-4 py-6 mr-4 my-2 flex-row justify-between">
         <View style={{ flex: 1 }}>
@@ -101,7 +101,7 @@ const LecturesCalendar = () => {
           </Text>
         </View>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: randomColor, borderRadius: 50, justifyContent: 'center', alignItems: 'center', width: 48, height: 48 }}>
+          <View style={{ backgroundColor: color, borderRadius: 50, justifyContent: 'center', alignItems: 'center', width: 48, height: 48 }}>
             <Text style={{ color: '#fff', fontWeight: 'bold' }}>
               {getInitials(item?.lecturerName)}
             </Text>
@@ -110,15 +110,13 @@ const LecturesCalendar = () => {
       </View>
     );
   };
-  
 
   return (
     <View className="flex-1">
       <Agenda
         items={scheduleData}
-        renderItem={renderItem}
+        renderItem={(item, index) => renderItem(item, index)}
         ListHeaderComponentStyle={{ fontFamily: 'Poppins-Regular' }}
-        calendarStyle={{ fontFamily: 'Poppins-Regular' }}
       />
     </View>
   );

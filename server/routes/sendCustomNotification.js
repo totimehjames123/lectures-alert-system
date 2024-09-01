@@ -61,7 +61,7 @@ const sendCustomNotification = async (req, res) => {
         const notificationDetails = {
           action: 'Other',
           classValue: classValue,
-          description: message,
+          description: `Message from ${lecturerName}: ` + message,
           lecturerIndexNumber,
           lecturerName,
           performedBy: lecturerName

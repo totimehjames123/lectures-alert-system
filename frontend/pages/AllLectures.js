@@ -57,7 +57,14 @@ const AllLectures = () => {
       }
     };
 
-    fetchLectures();
+    fetchLectures(); // Initial fetch
+
+    const intervalId = setInterval(() => {
+      fetchLectures();
+    }, 1000); // Refresh every 1 second
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -91,7 +98,7 @@ const AllLectures = () => {
 
   return (
     <View className="flex-1 p-4 bg-white ">
-    <Header title={'All Lectures'} description={"Search and select a lecture"}/>
+      <Header title={'All Lectures'} description={"Search and select a lecture"} />
       {/* Search Input */}
       <SearchInput
         searchQuery={searchQuery}
@@ -102,17 +109,18 @@ const AllLectures = () => {
 
       {/* Filter Dropdown */}
       <View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-2">
-        <FilterSelect
-          options={filterOptions}
-          selectedValue={selectedFilter}
-          onSelect={setSelectedFilter}
-        />
-      </ScrollView></View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-2">
+          <FilterSelect
+            options={filterOptions}
+            selectedValue={selectedFilter}
+            onSelect={setSelectedFilter}
+          />
+        </ScrollView>
+      </View>
 
       {/* Lectures List */}
       {filteredLectures.length > 0 ? (
-        <ScrollView contentContainerStyle={{paddingVertical: 10}} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingVertical: 10 }} showsVerticalScrollIndicator={false}>
           {filteredLectures.map((lecture, index) => (
             <UpcomingLecturesCard
               key={index}
@@ -136,7 +144,7 @@ const AllLectures = () => {
           ))}
         </ScrollView>
       ) : (
-        <Text className="text-center text-gray-500" style={{fontFamily: 'Poppins-Regular'}}>No lectures found.</Text>
+        <Text className="text-center text-gray-500" style={{ fontFamily: 'Poppins-Regular' }}>No lectures found.</Text>
       )}
 
       {/* Alert Message */}
@@ -151,12 +159,9 @@ const AllLectures = () => {
 };
 
 const styles = StyleSheet.create({
-  
   filterScroll: {
     marginTop: 10,
   },
-  
-  
 });
 
 export default AllLectures;
