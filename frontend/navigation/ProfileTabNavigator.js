@@ -2,21 +2,30 @@ import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
 import Profile from '../pages/Profile';
 import UpdatePassword from '../pages/UpdatePassword';
 import AlertMessage from '../components/AlertMessage';
+import { clearUser } from '../redux/userSlice';
+import { selectUser } from '../redux/userSlice';
 
 const Stack = createStackNavigator();
 
 export default function ProfileStackNavigator() {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('');
 
-  const handleLogout = async () => {
+  // Get the selected user from Redux state
+  const selectedUser = useSelector(selectUser);
+
+  // Extract the first name from the full name
+  const userName = selectedUser?.fullName?.split(' ')[0] || 'User';
+
+  const handleLogout = () => {
     Alert.alert(
       "Confirm Logout",
       "Are you sure you want to log out?",
@@ -27,21 +36,23 @@ export default function ProfileStackNavigator() {
         },
         {
           text: "OK",
-          onPress: async () => {
+          onPress: () => {
             try {
-              // Remove user data from AsyncStorage
-              await AsyncStorage.removeItem('currentUser'); // Adjust the key to your needs
+              // Dispatch the action to clear user data
+              dispatch(clearUser());
 
               // Show success message
               setAlertMessage('Successfully logged out');
-              setAlertType('success')
+              setAlertType('success');
               setAlertVisible(true);
 
-              // Wait for 2 seconds before navigating
+              // Reset the navigation stack
               setTimeout(() => {
-                navigation.navigate('Login');
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Login' }],
+                });
               }, 2000);
-              navigation.navigate('Login');
             } catch (error) {
               console.error('Failed to log out', error);
               setAlertMessage('Failed to log out');
@@ -66,7 +77,7 @@ export default function ProfileStackNavigator() {
           name="Profile"
           component={Profile}
           options={{
-            headerTitle: 'My Profile',
+            headerTitle: `${userName}'s Profile`,
             headerTitleAlign: 'center',
             headerRight: () => (
               <TouchableOpacity
@@ -81,7 +92,6 @@ export default function ProfileStackNavigator() {
         <Stack.Screen name="UpdatePassword" component={UpdatePassword} options={{ headerTitle: '' }} />
       </Stack.Navigator>
 
-      {/* Custom Alert Message Component */}
       <AlertMessage
         visible={alertVisible}
         onDismiss={() => setAlertVisible(false)}

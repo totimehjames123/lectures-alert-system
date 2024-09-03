@@ -1,58 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, ActivityIndicator, View } from 'react-native';
 import CountCards from './CountCards';
-import getCurrentUser from '../utils/getCurrentUser';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../redux/userSlice';
+
+// Utility functions to fetch data
+const getStudents = async () => {
+  try {
+    const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-users`);
+    const allUsers = response?.data?.users;
+    // Filter only students
+    const students = allUsers?.filter(user => user.role === 'Student');
+    return students.length; // Return the count of students
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    return 0; // Return 0 if there's an error
+  }
+};
+
+const getLecturers = async () => {
+  try {
+    const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-users`);
+    const allUsers = response?.data?.users;
+    // Filter only lecturers
+    const lecturers = allUsers?.filter(user => user.role === 'Lecturer');
+    return lecturers.length; // Return the count of lecturers
+  } catch (error) {
+    console.error('Error fetching lecturers:', error);
+    return 0; // Return 0 if there's an error
+  }
+};
 
 const CountCardContainer = () => {
-  const [role, setRole] = useState(null);
-  const [classValue, setClassValue] = useState(null);
-  const [indexNumber, setIndexNumber] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cardData, setCardData] = useState([]);
+  const navigation = useNavigation();
 
-  const navigation = useNavigation()
-
-  // Fetch all students
-  const getStudents = async () => {
-    try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-users`);
-      const allUsers = response?.data?.users;
-      // Filter only students
-      const students = allUsers?.filter(user => user.role === 'Student');
-      return students.length; // Return the count of students
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      return 0; // Return 0 if there's an error
-    }
-  };
-
-  // Fetch all lecturers
-  const getLecturers = async () => {
-    try {
-      const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-users`);
-      const allUsers = response?.data?.users;
-      // Filter only lecturers
-      const lecturers = allUsers?.filter(user => user.role === 'Lecturer');
-      return lecturers.length; // Return the count of lecturers
-    } catch (error) {
-      console.error('Error fetching lecturers:', error);
-      return 0; // Return 0 if there's an error
-    }
-  };
+  // Fetch user data from Redux store
+  const user = useSelector(selectUser);
+  const role = user?.role;
+  const indexNumber = user?.indexNumber;
+  const classValue = user?.classValue;
 
   const fetchUserDataAndScheduleData = async () => {
     try {
-      const user = await getCurrentUser();
-      if (!user) {
+      if (!role) {
+        // If there's no role, exit the function
         return;
       }
-
-      const { role, indexNumber, classValue } = user;
-      setRole(role);
-      setIndexNumber(indexNumber);
-      setClassValue(classValue);
 
       const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-schedules`, {
         params: {
@@ -146,13 +143,13 @@ const CountCardContainer = () => {
 
   useEffect(() => {
     fetchUserDataAndScheduleData();
-    const interval = setInterval(fetchUserDataAndScheduleData, 1000);
+    const interval = setInterval(fetchUserDataAndScheduleData, 1000); // Poll every hour
     return () => clearInterval(interval);
-  }, []);
+  }, [role, indexNumber, classValue]);
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );

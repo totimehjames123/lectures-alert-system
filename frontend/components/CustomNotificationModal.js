@@ -5,7 +5,8 @@ import SearchablePicker from './SearchablePicker';
 import { classes } from '../utils/constants';
 import CommentField from './CommentField';
 import axios from 'axios';
-import getCurrentUser from '../utils/getCurrentUser'; // Import the function to fetch current user
+import { useSelector } from 'react-redux';
+import { selectUser } from '../redux/userSlice'; // Import the selector to get user data
 import AlertMessage from './AlertMessage'; // Import the custom AlertMessage component
 
 const CustomNotificationModal = ({ visible, onClose }) => {
@@ -15,18 +16,17 @@ const CustomNotificationModal = ({ visible, onClose }) => {
     const [loading, setLoading] = useState(false); // Added loading state
     const [alert, setAlert] = useState({ visible: false, message: '', type: 'success' });
 
+    // Fetch user data from Redux store
+    const user = useSelector(selectUser);
+
     useEffect(() => {
-        const fetchLecturerDetails = async () => {
-            const user = await getCurrentUser();
-            if (user) {
-                setLecturerDetails({
-                    indexNumber: user.indexNumber,
-                    fullName: user.fullName,
-                });
-            }
-        };
-        fetchLecturerDetails();
-    }, []);
+        if (user) {
+            setLecturerDetails({
+                indexNumber: user.indexNumber,
+                fullName: user.fullName,
+            });
+        }
+    }, [user]);
 
     const handleConfirm = async () => {
         if (!lecturerDetails) {
@@ -91,15 +91,17 @@ const CustomNotificationModal = ({ visible, onClose }) => {
     return (
         <Modal transparent={true} visible={visible} animationType="slide">
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.7)' }}>
-                <View className="bg-white p-5 rounded-lg w-5/5 relative">
+                <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '90%', position: 'relative' }}>
                     <TouchableOpacity
                         onPress={onClose}
-                        className="absolute top-3 right-3"
+                        style={{ position: 'absolute', top: 10, right: 10 }}
                     >
                         <Ionicons name="close" size={24} color="black" />
                     </TouchableOpacity>
-                    <Text className="text-lg text-center" style={{ fontFamily: "Poppins-Regular" }}>Send a Notification</Text>
-                    <Text className="text-xs text-gray-600 text-center mb-4" style={{ fontFamily: "Poppins-Regular" }}>Send a customized notification to your students</Text>
+                    <Text style={{ fontSize: 18, textAlign: 'center', fontFamily: "Poppins-Regular" }}>Send a Notification</Text>
+                    <Text style={{ fontSize: 12, color: 'gray', textAlign: 'center', marginBottom: 16, fontFamily: "Poppins-Regular" }}>
+                        Send a customized notification to your students
+                    </Text>
 
                     <View>
                         <SearchablePicker
@@ -119,23 +121,23 @@ const CustomNotificationModal = ({ visible, onClose }) => {
                         />
                     </View>
 
-                    <View className="flex-row justify-center gap-2">
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 10 }}>
                         <TouchableOpacity
                             onPress={onClose}
-                            className="border border-gray-500 p-3 px-8 rounded"
+                            style={{ borderColor: 'gray', borderWidth: 1, padding: 10, paddingHorizontal: 20, borderRadius: 5 }}
                         >
-                            <Text className="text-gray-700" style={{ fontFamily: "Poppins-Regular" }}>Cancel</Text>
+                            <Text style={{ color: 'gray', fontFamily: "Poppins-Regular" }}>Cancel</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={handleConfirm}
-                            className="bg-orange-300 p-3 px-8 rounded-lg"
+                            style={{ backgroundColor: '#FBBF24', padding: 10, paddingHorizontal: 20, borderRadius: 5 }}
                             disabled={loading} // Disable button while loading
                         >
                             {loading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text className="text-gray-700" style={{ fontFamily: "Poppins-Regular" }}>Send</Text>
+                                <Text style={{ color: 'gray', fontFamily: "Poppins-Regular" }}>Send</Text>
                             )}
                         </TouchableOpacity>
                     </View>

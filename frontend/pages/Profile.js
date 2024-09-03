@@ -1,48 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, ActivityIndicator, Text, Image } from 'react-native';
-import getCurrentUser from '../utils/getCurrentUser'; // Adjust the import path as needed
+import { View, ScrollView, ActivityIndicator, Image, Text } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import AlertMessage from '../components/AlertMessage';
+import { selectUser } from '../redux/userSlice';
 import CheckLoginAndNavigate from '../utils/CheckLoginAndNavigate';
 
 const Profile = ({ navigation }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser); // Get user data from Redux store
+  const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
-          setUser(currentUser);
-        } else {
-          // Navigate to Login screen if no user data is found
-          navigation.navigate('Login');
-        }
-      } catch (error) {
-        setAlertType('error');
-        setAlertMessage('Failed to fetch user data');
-        setAlertVisible(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Fetch user data initially
-    fetchUserData();
-
-    // Set up interval to fetch user data every second
-    const intervalId = setInterval(() => {
-      fetchUserData();
-    }, 60000);
-
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [navigation]);
+    if (!user) {
+      // Navigate to Login screen if no user data is found
+      navigation.navigate('Login');
+    }
+  }, [user, navigation]);
 
   if (loading) {
     return (
@@ -53,17 +31,17 @@ const Profile = ({ navigation }) => {
   }
 
   if (!user) {
-    return null; // This will ensure that if user is not found, nothing is rendered until navigation occurs
+    return null; // Ensure nothing is rendered until navigation occurs
   }
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white' }}>
-      <CheckLoginAndNavigate passedPath={'Profile'} failedPath={'Login'} />
+      <CheckLoginAndNavigate passedPath={"ProfileStack"} failedPath={"Login"}/>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={{ flex: 1 }}>
         <View style={{ padding: 20 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 20 }}>
             <Image
-              source={require('./../assets/profile-picture.png')}
+              source={require('../assets/profile-picture.png')} // Ensure the path is correct
               style={{ width: 128, height: 128, borderRadius: 64 }}
             />
           </View>

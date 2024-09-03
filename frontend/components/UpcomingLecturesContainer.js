@@ -4,8 +4,9 @@ import axios from 'axios';
 import TextWithLink from './TextWithLink';
 import UpcomingLecturesCard from './UpcomingLecturesCard';
 import { useNavigation } from '@react-navigation/native';
-import getCurrentUser from '../utils/getCurrentUser';
 import formatTime from '../utils/formatTime';
+import { useSelector } from 'react-redux';
+import { selectUser, selectUserRole } from '../redux/userSlice';
 
 // Utility function to sort days of the week
 const sortDaysOfWeek = (lectures) => {
@@ -23,24 +24,29 @@ const UpcomingLecturesContainer = () => {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
+  // Fetch user data from Redux store
+  const user = useSelector(selectUser);
+  const userRole = useSelector(selectUserRole);
+
+  // Extract additional fields from user
+  const userIndexNumber = user?.indexNumber;
+  const userClassValue = user?.classValue;
+
   useEffect(() => {
     let interval;
 
     const fetchUpcomingLectures = async () => {
       try {
-        const currentUser = await getCurrentUser();
-        if (!currentUser) {
-          // console.log("No user data found");
+        if (!userRole) {
+          // console.log("No user role found");
           return;
         }
 
-        const { role, indexNumber, classValue } = currentUser;
-
         const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-schedules`, {
           params: {
-            role: role,
-            classValue: role === 'Student' ? classValue : undefined,
-            lecturerIndexNumber: role === 'Lecturer' ? indexNumber : undefined,
+            role: userRole,
+            classValue: userRole === 'Student' ? userClassValue : undefined,
+            lecturerIndexNumber: userRole === 'Lecturer' ? userIndexNumber : undefined,
           },
         });
 
@@ -57,11 +63,11 @@ const UpcomingLecturesContainer = () => {
     fetchUpcomingLectures();
 
     // Poll every hour
-    interval = setInterval(fetchUpcomingLectures, 1000);
+    interval = setInterval(fetchUpcomingLectures, 1000); // 1 hour in milliseconds
 
     // Clear interval on component unmount
     return () => clearInterval(interval);
-  }, []);
+  }, [userRole, userIndexNumber, userClassValue]);
 
   if (loading) {
     return <ActivityIndicator size="large" color="#FBBF24" />;

@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import axios from 'axios';
 import NotificationsCard from '../components/NotificationsCard';
-import getCurrentUser from '../utils/getCurrentUser';
+import { selectUser } from '../redux/userSlice';
 import { formatRelativeTime } from '../utils/formatRelativeTime';
 import { useFocusEffect } from '@react-navigation/native';
 import LoadingScreen from '../components/LoadingScreen';
+import { useSelector } from 'react-redux';
 
 const Notifications = ({ navigation }) => {
   const [notifications, setNotifications] = useState([]);
@@ -13,6 +14,7 @@ const Notifications = ({ navigation }) => {
   const [error, setError] = useState(null);
   const [userParams, setUserParams] = useState(null);
   const intervalRef = useRef(null);
+  const user = useSelector(selectUser);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -31,21 +33,21 @@ const Notifications = ({ navigation }) => {
       }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
-      // Don't set error state here to avoid disrupting the UI on every failed fetch
+      setError('Failed to fetch notifications');
+    } finally {
+      setLoading(false);
     }
   }, [userParams]);
 
   useEffect(() => {
     const initializeUser = async () => {
       try {
-        const currentUser = await getCurrentUser();
-        if (!currentUser) {
+        if (!user) {
           throw new Error('User not found');
         }
 
-        const { role, classValue, indexNumber, _id } = currentUser;
+        const { role, classValue, indexNumber, _id } = user;
         setUserParams({ role, classValue, indexNumber, _id });
-        setLoading(false);
       } catch (err) {
         setError('Failed to initialize user');
         setLoading(false);
@@ -53,12 +55,12 @@ const Notifications = ({ navigation }) => {
     };
 
     initializeUser();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (userParams) {
       fetchNotifications();
-      intervalRef.current = setInterval(fetchNotifications, 1000);
+      intervalRef.current = setInterval(fetchNotifications, 10000); // Increased interval for better performance
     }
 
     return () => {
@@ -67,30 +69,6 @@ const Notifications = ({ navigation }) => {
       }
     };
   }, [userParams, fetchNotifications]);
-
-  const handleNotificationRead = async (id) => {
-    try {
-      if (!userParams) return;
-
-      const { role, classValue, indexNumber, _id } = userParams;
-      
-      await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/mark-notification-read`, {
-        id,
-        role,
-        classValue,
-        indexNumber,
-        userId: _id
-      });
-
-      setNotifications((prevNotifications) =>
-        prevNotifications.map((notification) =>
-          notification._id === id ? { ...notification, readBy: [...notification.readBy, _id] } : notification
-        )
-      );
-    } catch (err) {
-      console.error('Failed to mark notification as read:', err);
-    }
-  };
 
   const markAllAsRead = async () => {
     try {
@@ -103,8 +81,8 @@ const Notifications = ({ navigation }) => {
         indexNumber,
         userId: _id
       });
-      setNotifications((prevNotifications) =>
-        prevNotifications.map((notification) => ({
+      setNotifications(prevNotifications =>
+        prevNotifications.map(notification => ({
           ...notification,
           readBy: [...notification.readBy, _id],
         }))
@@ -123,17 +101,23 @@ const Notifications = ({ navigation }) => {
   );
 
   if (loading) {
-    return <LoadingScreen text1='Fetching Notifications' text2=' '/>;
+    return <LoadingScreen text1='Fetching Notifications' text2='' />;
   }
 
   if (error) {
-    return <Text className="text-red-500 text-center mt-3" style={{fontFamily: 'Poppins-Regular'}}>{error}</Text>;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: 'red', textAlign: 'center', marginTop: 16, fontFamily: 'Poppins-Regular' }}>
+          {error}
+        </Text>
+      </View>
+    );
   }
 
-  const unreadNotifications = notifications.filter(notification => 
+  const unreadNotifications = notifications.filter(notification =>
     !notification.readBy.includes(userParams?._id)
   );
-  const readNotifications = notifications.filter(notification => 
+  const readNotifications = notifications.filter(notification =>
     notification.readBy.includes(userParams?._id)
   );
 
@@ -141,14 +125,18 @@ const Notifications = ({ navigation }) => {
     <ScrollView contentContainerStyle={{ paddingVertical: 10 }} style={{ backgroundColor: 'white', flex: 1 }}>
       {unreadNotifications.length === 0 && readNotifications.length === 0 ? (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: 'gray', textAlign: 'center', marginTop: 16, fontFamily: "Poppins-Regular" }}>You have no notifications</Text>
+          <Text style={{ color: 'gray', textAlign: 'center', marginTop: 16, fontFamily: "Poppins-Regular" }}>
+            You have no notifications
+          </Text>
         </View>
       ) : (
         <>
           {unreadNotifications.length > 0 && (
             <>
-              <Text style={{ fontSize: 12, color: 'gray', marginBottom: 8, paddingHorizontal: 10 }}>{unreadNotifications.length} UNREAD NOTIFICATIONS</Text>
-              {unreadNotifications.map((notification) => (
+              <Text style={{ fontSize: 12, color: 'gray', marginBottom: 8, paddingHorizontal: 10 }}>
+                {unreadNotifications.length} UNREAD NOTIFICATIONS
+              </Text>
+              {unreadNotifications.map(notification => (
                 <NotificationsCard
                   key={notification._id}
                   action={notification.action}
@@ -156,7 +144,6 @@ const Notifications = ({ navigation }) => {
                   description={notification.description}
                   period={formatRelativeTime(notification.date)}
                   isRead={false}
-                  onPress={() => handleNotificationRead(notification._id)}
                 />
               ))}
             </>
@@ -164,8 +151,10 @@ const Notifications = ({ navigation }) => {
 
           {readNotifications.length > 0 && (
             <>
-              <Text style={{ fontSize: 12, color: 'gray', marginVertical: 8, paddingHorizontal: 10  }}>ALL READ NOTIFICATIONS</Text>
-              {readNotifications.map((notification) => (
+              <Text style={{ fontSize: 12, color: 'gray', marginVertical: 8, paddingHorizontal: 10 }}>
+                ALL READ NOTIFICATIONS
+              </Text>
+              {readNotifications.map(notification => (
                 <NotificationsCard
                   key={notification._id}
                   action={notification.action}

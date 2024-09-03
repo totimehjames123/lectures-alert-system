@@ -1,26 +1,13 @@
-import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import getCurrentUser from '../utils/getCurrentUser';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../redux/userSlice';
 
 const Header = ({ title, description, isShowSearchIcon }) => {
   const navigation = useNavigation();
-
-  const [fullName, setFullName] = useState('');
-  const [greeting, setGreeting] = useState('');
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = await getCurrentUser();
-      if (user) {
-        setFullName(user?.fullName);
-      }
-    };
-    setGreeting(getGreeting());
-
-    fetchUser();
-  }, []);
+  const user = useSelector(selectUser); // Get user data from Redux store
 
   const getGreeting = () => {
     const currentHour = new Date().getHours();
@@ -33,12 +20,17 @@ const Header = ({ title, description, isShowSearchIcon }) => {
     }
   };
 
+  const greeting = user ? getGreeting() : '';
+  const fullName = user ? user.fullName : '';
+
   return (
     <View className="flex-row items-center gap-x-5 bg-white pt-16">
       {/* Text Container */}
-      <View className="flex-1">
-        <Text className="text-3xl" style={{ fontFamily: 'Poppins-Regular' }}>{title}</Text>
-        <Text className="text-gray-500" style={{ fontFamily: 'Poppins-Regular' }}>{description ? description : greeting + ", " + fullName?.split(' ')[0] + "!"}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 24, fontFamily: 'Poppins-Regular' }}>{title}</Text>
+        <Text style={{ color: 'gray', fontFamily: 'Poppins-Regular' }}>
+          {description ? description : `${greeting}, ${fullName.split(' ')[0]}!`}
+        </Text>
       </View>
 
       {/* Search Icon */}

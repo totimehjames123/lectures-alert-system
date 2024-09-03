@@ -7,7 +7,6 @@ import TimePicker from '../components/TimePicker';
 import CommentField from '../components/CommentField';
 import AlertMessage from '../components/AlertMessage';
 import { classes, days } from '../utils/constants';
-import getCurrentUser from '../utils/getCurrentUser';
 import { useRoute } from '@react-navigation/native';
 import SearchablePicker from '../components/SearchablePicker';
 
@@ -28,17 +27,6 @@ const ScheduleLecture = ({ navigation }) => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
 
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const user = await getCurrentUser();
-      if (user) {
-        // You can use user data as needed
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   const validateInputs = () => {
     if (!courseName.trim()) return 'Course Name is required';
@@ -62,7 +50,6 @@ const ScheduleLecture = ({ navigation }) => {
     setLoading(true);
 
     try {
-      const user = await getCurrentUser();
       const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/schedule-lecture`, {
         lecturerName: fullName,
         lecturerIndexNumber: indexNumber,

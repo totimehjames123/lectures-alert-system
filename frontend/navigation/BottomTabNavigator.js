@@ -8,7 +8,6 @@ import AddUser from '../pages/AddUser';
 import NotificationsStackNavigator from './NotificationsStackNavigator';
 import ScheduleLecture from '../pages/ScheduleLecture';
 import AllLecturers from '../pages/AllLecturers';
-import checkUserRole from '../utils/checkUserRole';
 import Profile from '../pages/Profile';
 import ProfileStackNavigator from './ProfileTabNavigator';
 import SearchStackNavigator from './SearchStackNavigator';
@@ -16,25 +15,7 @@ import SearchStackNavigator from './SearchStackNavigator';
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
-  const [role, setRole] = useState(null);
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const userRole = await checkUserRole();
-        setRole(userRole);
-      } catch (e) {
-        console.log('Error fetching user role:', e);
-      }
-    };
-
-    fetchUserRole();
-  }, []);
-
-  // While loading or if role is not determined, show nothing or a loading indicator
-  if (role === null) {
-    return null; // Or a loading spinner
-  }
+  const [role, setRole] = useState("admin");
 
   return (
     <Tab.Navigator

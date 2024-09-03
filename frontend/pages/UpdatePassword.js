@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
-import getCurrentUser from '../utils/getCurrentUser';
+import { useDispatch, useSelector } from 'react-redux';
 import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import AlertMessage from '../components/AlertMessage';
 import FormTitle from '../components/FormTitle';
-import storeCurrentUser from '../utils/storeCurrentUser';
+import { clearUser } from '../redux/userSlice';
 
 const UpdatePassword = ({ navigation }) => {
-  const [indexNumber, setIndexNumber] = useState('');
+  const dispatch = useDispatch();
+  const indexNumber = useSelector((state) => state.user.user?.indexNumber); // Get indexNumber from Redux store
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,62 +18,48 @@ const UpdatePassword = ({ navigation }) => {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
 
-  useEffect(() => {
-    // Fetch the current user's index number from AsyncStorage
-    const fetchIndexNumber = async () => {
-      const currentUser = await getCurrentUser();
-      if (currentUser) {
-        setIndexNumber(currentUser.indexNumber);
-      }
-    };
-
-    fetchIndexNumber();
-  }, []);
-
   const handleUpdatePassword = async () => {
-  if (!currentPassword.trim() || !newPassword.trim()) {
-    setAlertType('error');
-    setAlertMessage('Please fill in all fields');
-    setAlertVisible(true);
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/update-password`, {
-      indexNumber,
-      currentPassword,
-      newPassword,
-    });
-
-    if (response.status === 200) {
-      setAlertType('success');
-      setAlertMessage('Password updated successfully');
-      setAlertVisible(true);
-      storeCurrentUser({});
-
-      // Delay navigation after showing the message
-      setTimeout(() => {
-        setAlertVisible(false);
-        // Re-verify user after clearing storage
-        navigation.navigate('Login');
-      }, 2000); 
-
-    } else {
+    if (!currentPassword.trim() || !newPassword.trim()) {
       setAlertType('error');
-      setAlertMessage(response.data.message || 'Failed to update password');
+      setAlertMessage('Please fill in all fields');
       setAlertVisible(true);
+      return;
     }
-  } catch (error) {
-    setAlertType('error');
-    setAlertMessage(error.response?.data?.message || 'Password update failed');
-    setAlertVisible(true);
-  } finally {
-    setLoading(false);
-  }
-};
 
+    setLoading(true);
+
+    try {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/update-password`, {
+        indexNumber,
+        currentPassword,
+        newPassword,
+      });
+
+      if (response.status === 200) {
+        setAlertType('success');
+        setAlertMessage('Password updated successfully');
+        setAlertVisible(true);
+        dispatch(clearUser()); // Clear user data from Redux store
+
+        // Delay navigation after showing the message
+        setTimeout(() => {
+          setAlertVisible(false);
+          navigation.navigate('Login');
+        }, 2000);
+
+      } else {
+        setAlertType('error');
+        setAlertMessage(response.data.message || 'Failed to update password');
+        setAlertVisible(true);
+      }
+    } catch (error) {
+      setAlertType('error');
+      setAlertMessage(error.response?.data?.message || 'Password update failed');
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white' }}>

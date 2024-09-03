@@ -5,8 +5,9 @@ import axios from 'axios';
 import FormInput from '../components/FormInput';
 import CommentField from '../components/CommentField';
 import FormButton from '../components/FormButton';
-import checkUserRole from '../utils/checkUserRole';
 import AlertMessage from '../components/AlertMessage';
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '../redux/userSlice';
 
 const LectureDetails = () => {
   const route = useRoute();
@@ -27,6 +28,8 @@ const LectureDetails = () => {
     comment
   } = route.params || {};
 
+  // Fetch user role from Redux store
+  const userRoleFromStore = useSelector(selectUserRole);
   const [userRole, setUserRole] = useState('student');
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
@@ -34,13 +37,24 @@ const LectureDetails = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const role = await checkUserRole();
-      setUserRole(role);
+    const mapRole = (role) => {
+      switch (role) {
+        case 'Admin':
+          return 'admin';
+        case 'Lecturer':
+          return 'lecturer';
+        case 'Student':
+          return 'student';
+        default:
+          console.log('Unknown user role:', role);
+          return 'student';
+      }
     };
 
-    fetchUserRole();
-  }, []);
+    if (userRoleFromStore) {
+      setUserRole(mapRole(userRoleFromStore));
+    }
+  }, [userRoleFromStore]);
 
   const formatTime = (time) => {
     if (!time) return '';

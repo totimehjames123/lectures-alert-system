@@ -18,14 +18,15 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.totimehjamestetteh.frontend"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "07b85b2c-b815-4cc2-b71d-ce2714bafb9a"
+        "projectId": "5a82678c-73f5-4594-b445-48a63aae97b0"
       }
     }
   }

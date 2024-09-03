@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import checkUserRole from '../utils/checkUserRole';
+// import checkUserRole from '../utils/checkUserRole';
 import TextWithLink from './TextWithLink';
 import { useNavigation } from '@react-navigation/native';
 
@@ -18,7 +18,8 @@ const SupportiveTools = () => {
 
   useEffect(() => {
     const fetchRoleAndFilter = async () => {
-      const role = await checkUserRole();
+      // const role = await checkUserRole();
+      const role = "admin"
       let toolsToShow = [];
 
       if (role === 'admin') {

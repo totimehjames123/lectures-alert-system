@@ -13,7 +13,7 @@ export default async function verifyUser() {
       const response = await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URL}/verify-user`, { _id, indexNumber });
 
       if (response.status === 200) {
-        await storeCurrentUser(response.data.user);
+        // await storeCurrentUser(response.data.user);
         return true;  // User is verified
       
       } else {

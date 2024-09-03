@@ -63,6 +63,7 @@ const AllLecturers = ({navigation}) => {
         searchQuery={searchQuery}
         onChangeText={setSearchQuery}
         moreClass={'my-2'}
+        placeholder={'Search Full Name or Index Number'}
       />
 
       <ScrollView contentContainerStyle={{ paddingVertical: 10 }}>

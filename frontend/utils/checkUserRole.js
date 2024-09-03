@@ -1,26 +1,23 @@
-import getCurrentUser from './getCurrentUser';
+import { useSelector } from 'react-redux';
+import { selectUserRole } from '../redux/userSlice';
 
-const checkUserRole = async () => {
-  try {
-    const user = await getCurrentUser();
+const checkUserRole = () => {
+  const userRole = useSelector(selectUserRole);
 
-    if (user && user.role) {
-      switch (user.role) {
-        case 'Admin':
-          return 'admin';
-        case 'Lecturer':
-          return 'lecturer';
-        case 'Student':
-          return 'student';
-        default:
-          return null;
-      }
-    } else {
-      console.log('User role is not defined or user not found');
-      return null;
+  if (userRole) {
+    switch (userRole) {
+      case 'Admin':
+        return 'admin';
+      case 'Lecturer':
+        return 'lecturer';
+      case 'Student':
+        return 'student';
+      default:
+        console.log('Unknown user role:', userRole);
+        return null;
     }
-  } catch (e) {
-    console.log('Error checking user role:', e);
+  } else {
+    console.log('User role is not defined or user not found');
     return null;
   }
 };

@@ -95,6 +95,7 @@ const ManageUsers = () => {
       <SearchInput
         searchQuery={searchQuery}
         onChangeText={setSearchQuery}
+        placeholder={"Search Full Name or Index Number"}
       />
 
       {/* Role Filter Dropdown */}

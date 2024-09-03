@@ -6,8 +6,9 @@ import SearchInput from '../components/SearchInput';
 import UpcomingLecturesCard from '../components/UpcomingLecturesCard';
 import AlertMessage from '../components/AlertMessage';
 import formatTime from '../utils/formatTime';
-import getCurrentUser from '../utils/getCurrentUser';
+import { selectUser } from '../redux/userSlice';
 import Header from '../components/Header';
+import { useSelector } from 'react-redux';
 
 const AllLectures = () => {
   const [lectures, setLectures] = useState([]);
@@ -18,6 +19,9 @@ const AllLectures = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
+  const user = useSelector(selectUser); // Get user data from Redux store
+
+  const { role, indexNumber, classValue } = user;
 
   const filterOptions = [
     { label: 'All', value: 'All' },
@@ -29,15 +33,14 @@ const AllLectures = () => {
   useEffect(() => {
     const fetchLectures = async () => {
       try {
-        const currentUser = await getCurrentUser();
-        if (!currentUser) {
+        
+        if (!user) {
           setAlertType('error');
           setAlertMessage('No user data found');
           setAlertVisible(true);
           return;
         }
 
-        const { role, indexNumber, classValue } = currentUser;
 
         const response = await axios.get(`${process.env.EXPO_PUBLIC_SERVER_URL}/all-schedules`, {
           params: {

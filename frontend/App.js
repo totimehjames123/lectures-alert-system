@@ -4,14 +4,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import MyStacks from './components/MyStacks';
 import { Provider } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppProvider } from './context/AppContext';
+import { SafeAreaView, AppRegistry } from 'react-native';
+import {Provider as ReduxProvider} from 'react-redux'
+import { store, persistor } from './redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
 
 export default function App() {
 
   const [loaded, error] = useFonts({
-    'Poppins-Regular': require('./assets/fonts/Poppins-Regular.ttf'),
-    'Poppins-Bold': require('./assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-Regular': require('./assets/fonts/Poppins-Regular.ttf')
   });
 
   useEffect(() => {
@@ -25,17 +26,21 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <AppProvider>
-        <Provider>
-          <NavigationContainer>
-            <MyStacks>
-              <Toast />
-            </MyStacks>
-          </NavigationContainer>
-        </Provider>
-      </AppProvider>
-    </SafeAreaProvider> 
+    
+    <ReduxProvider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+      <SafeAreaView style={{flex: 1}}>
+          <Provider>
+            <NavigationContainer>
+              <MyStacks>
+                <Toast />
+              </MyStacks>
+            </NavigationContainer>
+          </Provider>
+      </SafeAreaView> 
+      </PersistGate>
+    </ReduxProvider>
+    
   );
 }
 

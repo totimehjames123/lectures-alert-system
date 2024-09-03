@@ -1,26 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import Notifications from '../pages/Notifications';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import CustomNotificationModal from '../components/CustomNotificationModal'; // Adjust path as needed
-import checkUserRole from '../utils/checkUserRole'; // Import the checkUserRole function
+import { useSelector } from 'react-redux';
+import { selectUser } from '../redux/userSlice';
 
 const Stack = createStackNavigator();
 
 export default function NotificationsStackNavigator() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      const role = await checkUserRole();
-      setUserRole(role);
-    };
-
-    fetchUserRole();
-  }, []);
+  
+  // Access user role from Redux store
+  const user = useSelector(selectUser);
+  const userRole = user?.role; // Assuming `role` is a property of the user object
 
   const handleConfirm = () => {
     setLoading(true);
@@ -39,7 +34,7 @@ export default function NotificationsStackNavigator() {
           headerShown: true,
           headerTitleStyle: { fontFamily: 'Poppins-Regular' },
           headerRight: () => (
-            userRole == 'lecturer' && (
+            userRole === 'Lecturer' && (
               <TouchableOpacity onPress={() => setModalVisible(true)}>
                 <Ionicons name='add-circle-outline' size={24} style={{ paddingRight: 15 }} />
               </TouchableOpacity>
