@@ -124,7 +124,7 @@ const Notifications = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={{ paddingVertical: 10 }} style={{ backgroundColor: 'white', flex: 1 }}>
       {unreadNotifications.length === 0 && readNotifications.length === 0 ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
           <Text style={{ color: 'gray', textAlign: 'center', marginTop: 16, fontFamily: "Poppins-Regular" }}>
             You have no notifications
           </Text>
