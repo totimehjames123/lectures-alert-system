@@ -2,17 +2,23 @@ import ScheduleCollection from '../models/schedules.js';
 import usersCollection from '../models/users.js';
 import sendEmailNotification from '../utils/sendEmailNotification.js';
 import sendPushNotification from '../utils/sendPushNotification.js';
+import sendSMSNotification from '../utils/sendSMSNotification.js'; // Import the sendSMSNotification function
 import logActivity from '../utils/logActivity.js'; // Adjust path as needed
 
 const BATCH_SIZE = 5; // Adjust batch size as needed
 
+// Process notifications in batches
 const processNotificationsInBatches = async (notifications) => {
   for (let i = 0; i < notifications.length; i += BATCH_SIZE) {
     const batch = notifications.slice(i, i + BATCH_SIZE);
     await Promise.all(batch.map(notification => {
-      return notification.type === 'email'
-        ? sendEmailNotification(notification.recipient, notification.title, notification.body)
-        : sendPushNotification(notification.recipient, notification.title, notification.body, notification.lectureId);
+      if (notification.type === 'email') {
+        return sendEmailNotification(notification.recipient, notification.title, notification.body);
+      } else if (notification.type === 'push') {
+        return sendPushNotification(notification.recipient, notification.title, notification.body, notification.lectureId);
+      } else if (notification.type === 'sms') {
+        return sendSMSNotification(notification.recipient, notification.body);
+      }
     }));
   }
 };
@@ -98,6 +104,15 @@ const updateLectureStatus = async (req, res) => {
           title,
           body
         });
+
+        // Send SMS notification if phone number exists
+        if (student.contact) {
+          notifications.push({
+            type: 'sms',
+            recipient: student.contact,
+            body
+          });
+        }
       });
     }
 
@@ -130,6 +145,15 @@ const updateLectureStatus = async (req, res) => {
         title: lecturerTitle,
         body: lecturerBody
       });
+
+      // Send SMS notification if phone number exists
+      if (lecturer.contact) {
+        notifications.push({
+          type: 'sms',
+          recipient: lecturer.contact,
+          body: lecturerBody
+        });
+      }
     }
 
     // Process notifications in batches

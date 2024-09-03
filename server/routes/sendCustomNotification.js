@@ -1,6 +1,7 @@
 import usersCollection from '../models/users.js';
 import sendPushNotification from '../utils/sendPushNotification.js';
 import sendEmailNotification from '../utils/sendEmailNotification.js';
+import sendSMSNotification from '../utils/sendSMSNotification.js'; 
 import logActivity from '../utils/logActivity.js';
 
 const BATCH_SIZE = 5;
@@ -9,9 +10,13 @@ const processNotificationsInBatches = async (notifications) => {
   for (let i = 0; i < notifications.length; i += BATCH_SIZE) {
     const batch = notifications.slice(i, i + BATCH_SIZE);
     await Promise.all(batch.map(notification => {
-      return notification.type === 'email'
-        ? sendEmailNotification(notification.recipient, notification.title, notification.body)
-        : sendPushNotification(notification.recipient, notification.title, notification.body, notification.lectureId);
+      if (notification.type === 'email') {
+        return sendEmailNotification(notification.recipient, notification.title, notification.body);
+      } else if (notification.type === 'push') {
+        return sendPushNotification(notification.recipient, notification.title, notification.body, notification.lectureId);
+      } else if (notification.type === 'sms') {
+        return sendSMSNotification(notification.recipient, notification.body); // Use sendSMSNotification
+      }
     }));
   }
 };
@@ -50,6 +55,15 @@ const sendCustomNotification = async (req, res) => {
           title: `Notification from Lecturer ${lecturerName}`,
           body: message,
           lectureId: lecturerIndexNumber
+        });
+      }
+
+      // Add SMS notification if phone number exists
+      if (student.phoneNumber) {
+        notifications.push({
+          type: 'sms',
+          recipient: student.phoneNumber,
+          body: message
         });
       }
     });

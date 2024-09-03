@@ -2,6 +2,18 @@ import usersCollection from '../models/users.js';
 import ScheduleCollection from '../models/schedules.js';
 import sendEmailNotification from './sendEmailNotification.js';
 import sendPushNotification from './sendPushNotification.js'; // Import your push notification function
+import sendSMSNotification from './sendSMSNotification.js'; // Import the sendSMSNotification function
+
+const formatDate = (date) => {
+    // Create a new Intl.DateTimeFormat instance
+    const formatter = new Intl.DateTimeFormat('en-GB', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+    });
+    return formatter.format(new Date(date));
+};
 
 const checkAndSendNotifications = async () => {
     try {
@@ -24,11 +36,14 @@ const checkAndSendNotifications = async () => {
 
             console.log(`Processing lecture: ${lecture._id}`);
 
+            // Format the rescheduled date if available
+            const formattedRescheduledDate = lecture.rescheduledDate ? formatDate(lecture.rescheduledDate) : '';
+
             // Notification logic based on the lecture status
             const emailSubject = lecture.status === 'Scheduled' ? 'Lecture Reminder' : 'Lecture Postponed';
             const emailBody = lecture.status === 'Scheduled'
                 ? `Reminder: Your lecture is scheduled for ${lecture.day}. Course: ${lecture.courseName}, Lecturer: ${lecture.lecturerName}, Venue: ${lecture.venue}, Class: ${lecture.classValue}.`
-                : `Notice: The lecture originally scheduled for ${lecture.day} has been postponed to ${lecture.rescheduledDate}. Course: ${lecture.courseName}, Lecturer: ${lecture.lecturerName}, Venue: ${lecture.venue}, Class: ${lecture.classValue}.`;
+                : `Notice: The lecture originally scheduled for ${lecture.day} has been postponed to ${formattedRescheduledDate}. Course: ${lecture.courseName}, Lecturer: ${lecture.lecturerName}, Venue: ${lecture.venue}, Class: ${lecture.classValue}.`;
 
             const pushNotificationBody = emailBody; // Use the same body for push notifications
 
@@ -36,14 +51,20 @@ const checkAndSendNotifications = async () => {
             students.forEach(student => sendEmailNotification(student.email, emailSubject, emailBody));
             lecturers.forEach(lecturer => sendEmailNotification(lecturer.email, emailSubject, emailBody));
 
-            // Send push notifications if push tokens are available
+            // Send SMS notifications if phone numbers are available
             for (const student of students) {
+                if (student.contact) {
+                    await sendSMSNotification([student.contact], emailBody); // Send SMS to the student
+                }
                 if (student.expoPushToken) {
                     await sendPushNotification(student.expoPushToken, emailSubject, pushNotificationBody, lecture._id);
                 }
             }
 
             for (const lecturer of lecturers) {
+                if (lecturer.contact) {
+                    await sendSMSNotification([lecturer.contact], emailBody); // Send SMS to the lecturer
+                }
                 if (lecturer.expoPushToken) {
                     await sendPushNotification(lecturer.expoPushToken, emailSubject, pushNotificationBody, lecture._id);
                 }

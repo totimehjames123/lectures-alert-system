@@ -21,7 +21,7 @@ const AlertMessage = ({ visible, onDismiss, message, type }) => {
       visible={visible}
       onDismiss={onDismiss}
       duration={3000}
-      style={{ backgroundColor, position: 'relative', top: '2' }}
+      style={{ backgrounColor, position: 'relative', top: '2' }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Ionicons name={icon} size={24} style={{ color: 'white', marginRight: 8 }} />

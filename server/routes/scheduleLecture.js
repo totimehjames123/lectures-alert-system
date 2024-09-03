@@ -2,6 +2,7 @@ import ScheduleCollection from '../models/schedules.js';
 import usersCollection from '../models/users.js';
 import sendPushNotification from '../utils/sendPushNotification.js';
 import sendEmailNotification from '../utils/sendEmailNotification.js';
+import sendSMSNotification from '../utils/sendSMSNotification.js'; // Import the sendSMSNotification function
 import logActivity from '../utils/logActivity.js'; // Import the logActivity function
 
 const BATCH_SIZE = 5; // Adjust batch size as needed
@@ -10,9 +11,13 @@ const processNotificationsInBatches = async (notifications) => {
   for (let i = 0; i < notifications.length; i += BATCH_SIZE) {
     const batch = notifications.slice(i, i + BATCH_SIZE);
     await Promise.all(batch.map(notification => {
-      return notification.type === 'email'
-        ? sendEmailNotification(notification.recipient, notification.title, notification.body)
-        : sendPushNotification(notification.recipient, notification.title, notification.body, notification.lectureId);
+      if (notification.type === 'email') {
+        return sendEmailNotification(notification.recipient, notification.title, notification.body);
+      } else if (notification.type === 'push') {
+        return sendPushNotification(notification.recipient, notification.title, notification.body, notification.lectureId);
+      } else if (notification.type === 'sms') {
+        return sendSMSNotification(notification.recipient, notification.body);
+      }
     }));
   }
 };
@@ -85,6 +90,14 @@ const scheduleLecture = async (req, res) => {
         title: `New Lecture Scheduled for ${courseName}`,
         body: `Dear ${lecturer.fullName},\n\nA new lecture for ${courseName} in class ${classValue} has been scheduled.\n\nDetails:\n- Date: ${day}\n- Time: ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n- Venue: ${venue}\n\nBest Regards,\nYour University\n\n${comment ? `Note: ${comment}` : ''}`
       });
+
+      if (lecturer.contact) {
+        notifications.push({
+          type: 'sms',
+          recipient: lecturer.contact,
+          body: `Hi ${lecturer.fullName}, a new lecture for ${courseName} in class ${classValue} has been scheduled on ${day} from ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} at ${venue}.`
+        });
+      }
     }
 
     // Notify students
@@ -105,10 +118,18 @@ const scheduleLecture = async (req, res) => {
         title: `New Lecture Scheduled for ${courseName}`,
         body: `Dear ${student.fullName},\n\nA new lecture for ${courseName} in class ${classValue} has been scheduled.\n\nDetails:\n- Date: ${day}\n- Time: ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n- Venue: ${venue}\n\nBest Regards,\nYour University\n\n${comment ? `Note: ${comment}` : ''}`
       });
+
+      if (student.contact) {
+        notifications.push({
+          type: 'sms',
+          recipient: student.contact,
+          body: `Hi ${student.fullName}, a new lecture for ${courseName} in class ${classValue} has been scheduled on ${day} from ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} at ${venue}.`
+        });
+      }
     }
 
     // Process notifications in batches
-    processNotificationsInBatches(notifications).catch(error => console.error('Error sending notifications:', error));
+    await processNotificationsInBatches(notifications).catch(error => console.error('Error sending notifications:', error));
 
     // Log the activity using logActivity with formatted time and additional details
     await logActivity({
@@ -116,8 +137,8 @@ const scheduleLecture = async (req, res) => {
       classValue,
       description: `Lecture scheduled for ${lecturerName} for the course ${courseName} in class ${classValue} on ${day} from ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} in ${venue}.${comment ? `\nNote: ${comment}` : ''}`,
       lectureId: savedLecture._id,
-      lecturerName: lecturerName, // Add lectureName
-      lecturerIndexNumber: lecturerIndexNumber , // Add lectureIndexNumber
+      lecturerName: lecturerName,
+      lecturerIndexNumber: lecturerIndexNumber,
       performedBy: 'Admin', // Assuming the lecturerName is the one performing the action
     }).catch(error => console.error('Error logging activity:', error));
 
