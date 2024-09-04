@@ -1,40 +1,38 @@
+// src/components/SupportiveTools.js
+
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-// import checkUserRole from '../utils/checkUserRole';
+import { useSelector } from 'react-redux'; // Import useSelector directly
+import { selectUserRole } from '../redux/userSlice'; // Import the selector
 import TextWithLink from './TextWithLink';
 import { useNavigation } from '@react-navigation/native';
 
 const SUPPORTIVE_TOOLS_DATA = [
-    { id: '1', icon: 'person-add-outline', title: 'Add user', iconColor: '#F87171', link: 'AddUser' }, 
-    { id: '2', icon: 'calendar-outline', title: 'Schedule', iconColor: '#F59E0B', link: 'LecturesCalendar' },  
-    { id: '3', icon: 'people-outline', title: 'Manage users', iconColor: '#10B981', link: 'ManageUsers' }, 
-    { id: '4', icon: 'notifications-outline', title: 'Notifications', iconColor: '#A78BFA', link: 'NotificationsStack' }, 
+  { id: '1', icon: 'person-add-outline', title: 'Add user', iconColor: '#F87171', link: 'AddUser' },
+  { id: '2', icon: 'calendar-outline', title: 'Schedule', iconColor: '#F59E0B', link: 'LecturesCalendar' },
+  { id: '3', icon: 'people-outline', title: 'Manage users', iconColor: '#10B981', link: 'ManageUsers' },
+  { id: '4', icon: 'notifications-outline', title: 'Notifications', iconColor: '#A78BFA', link: 'NotificationsStack' },
 ];
 
 const SupportiveTools = () => {
   const [filteredTools, setFilteredTools] = useState([]);
-  const navigation = useNavigation()
+  const userRole = useSelector(selectUserRole); // Use useSelector directly
+  const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchRoleAndFilter = async () => {
-      // const role = await checkUserRole();
-      const role = "admin"
-      let toolsToShow = [];
+    let toolsToShow = [];
 
-      if (role === 'admin') {
-        toolsToShow = SUPPORTIVE_TOOLS_DATA;
-      } else if (role === 'lecturer' || role === 'student') {
-        toolsToShow = SUPPORTIVE_TOOLS_DATA.filter(
-          (tool) => tool.link === 'LecturesCalendar' || tool.link === 'NotificationsStack'
-        );
-      }
+    if (userRole === 'Admin') {
+      toolsToShow = SUPPORTIVE_TOOLS_DATA;
+    } else if (userRole === 'Lecturer' || userRole === 'Student') {
+      toolsToShow = SUPPORTIVE_TOOLS_DATA.filter(
+        (tool) => tool.link === 'LecturesCalendar' || tool.link === 'NotificationsStack'
+      );
+    }
 
-      setFilteredTools(toolsToShow);
-    };
-
-    fetchRoleAndFilter();
-  }, []);
+    setFilteredTools(toolsToShow);
+  }, [userRole]); // Re-run effect when userRole changes
 
   // If no tools should be displayed, render nothing
   if (filteredTools.length === 0) {
@@ -43,7 +41,12 @@ const SupportiveTools = () => {
 
   return (
     <>
-      <TextWithLink moreClass={'my-3'} title={'Supportive tools'} buttonTitle={'Explore'} onPress={() => navigation.navigate("LecturesCalendar")}/>
+      <TextWithLink 
+        moreClass={'my-3'} 
+        title={'Supportive tools'} 
+        buttonTitle={'Explore'} 
+        onPress={() => navigation.navigate("LecturesCalendar")}
+      />
       <FlatList
         data={filteredTools}
         renderItem={({ item }) => (

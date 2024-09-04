@@ -1,21 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
+import { useSelector } from 'react-redux'; // Import useSelector
+import { selectUserRole } from '../redux/userSlice'; // Import the selector
 import HomeStackNavigator from './HomeStackNavigator';
-import Notifications from '../pages/Notifications';
-import AddUser from '../pages/AddUser';
 import NotificationsStackNavigator from './NotificationsStackNavigator';
-import ScheduleLecture from '../pages/ScheduleLecture';
 import AllLecturers from '../pages/AllLecturers';
-import Profile from '../pages/Profile';
 import ProfileStackNavigator from './ProfileTabNavigator';
 import SearchStackNavigator from './SearchStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
-  const [role, setRole] = useState("admin");
+  const role = useSelector(selectUserRole); // Get the role from the Redux store
 
   return (
     <Tab.Navigator
@@ -51,7 +49,7 @@ export default function BottomTabNavigator() {
         }}
       />
       
-      {role === 'admin' && (
+      {role === 'Admin' && (
         <Tab.Screen
           name="AddLecturer"
           component={AllLecturers}

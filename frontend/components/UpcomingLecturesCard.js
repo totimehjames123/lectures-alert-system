@@ -48,7 +48,7 @@ const UpcomingLecturesCard = ({ imageSource, id, lecturerName, lecturerIndexNumb
               {lecturerName || 'Lecture Name'}
             </Text>
             <Text className="text-gray-500 text-xs" numberOfLines={2} style={{ fontFamily: 'Poppins-Regular' }}>
-              {courseTitle || 'Course Title'}
+              {classValue  + " • "+ courseTitle || 'Course Title'}
             </Text>
           </View>
         </View>
