@@ -21,7 +21,10 @@ const AllLectures = () => {
   const [alertType, setAlertType] = useState('success');
   const user = useSelector(selectUser); // Get user data from Redux store
 
-  const { role, indexNumber, classValue } = user;
+  // Guard against user being null or undefined
+  const role = user?.role;
+  const indexNumber = user?.indexNumber;
+  const classValue = user?.classValue;
 
   const filterOptions = [
     { label: 'All', value: 'All' },

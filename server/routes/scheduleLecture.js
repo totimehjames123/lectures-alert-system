@@ -88,7 +88,7 @@ const scheduleLecture = async (req, res) => {
         type: 'email',
         recipient: lecturer.email,
         title: `New Lecture Scheduled for ${courseName}`,
-        body: `Dear ${lecturer.fullName},\n\nA new lecture for ${courseName} in class ${classValue} has been scheduled.\n\nDetails:\n- Date: ${day}\n- Time: ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n- Venue: ${venue}\n\nBest Regards,\nYour University\n\n${comment ? `Note: ${comment}` : ''}`
+        body: `Dear ${lecturer.fullName},\n\nA new lecture for ${courseName} in class ${classValue} has been scheduled.\n\nDetails:\n- Date: ${day}\n- Time: ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n- Venue: ${venue}\n\nBest Regards,\nAccra Technical University\nComputer Science Department\n\n${comment ? `Note: ${comment}` : ''}`
       });
 
       if (lecturer.contact) {
@@ -116,7 +116,7 @@ const scheduleLecture = async (req, res) => {
         type: 'email',
         recipient: student.email,
         title: `New Lecture Scheduled for ${courseName}`,
-        body: `Dear ${student.fullName},\n\nA new lecture for ${courseName} in class ${classValue} has been scheduled.\n\nDetails:\n- Date: ${day}\n- Time: ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n- Venue: ${venue}\n\nBest Regards,\nYour University\n\n${comment ? `Note: ${comment}` : ''}`
+        body: `Dear ${student.fullName},\n\nA new lecture for ${courseName} in class ${classValue} has been scheduled.\n\nDetails:\n- Date: ${day}\n- Time: ${new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} to ${new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n- Venue: ${venue}\n\nBest Regards,\nAccra Technical University\nComputer Science Department\n\n${comment ? `Note: ${comment}` : ''}`
       });
 
       if (student.contact) {

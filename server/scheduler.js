@@ -5,7 +5,7 @@ import checkAndSendNotifications from './utils/checkAndSendNotifications.js';
 // Ensure DB connection is established
 connectDB.then(() => {
     // Schedule the function to run every day at 6:00 AM
-    cron.schedule('0 6 * * *', () => {
+    cron.schedule('5 10 * * *', () => {
         console.log('Running checkAndSendNotifications every day at 6:00 AM...');
         checkAndSendNotifications();
     }, {
