@@ -1,13 +1,13 @@
 import axios from 'axios'; // Ensure axios is imported
 
-const sendSMSNotification = async (phoneNumbers, message) => {
+const sendSMSNotification = async (phoneNumber, message) => {
   try {
     const apiKey = process.env.SMS_KEY;
     if (!apiKey) {
       throw new Error("API key is not defined. Check your environment variables.");
     }
 
-    const to = phoneNumbers.join(',');
+    const to = phoneNumber
 
     const response = await axios.get('https://sms.arkesel.com/sms/api', {
       params: { 
