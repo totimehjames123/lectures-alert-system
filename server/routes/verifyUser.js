@@ -7,7 +7,7 @@ export const verifyUser = async (req, res) => {
         const userFound = await usersCollection.findOne({ _id, indexNumber });
 
         if (!userFound) {
-            return res.status(401).json({ message: 'Invalid user credentials' });
+            return res.status(401).json({ message: 'Invalid user credentials!' });
         }
 
         return res.status(200).json({ message: 'User verified successfully!', user: userFound });
