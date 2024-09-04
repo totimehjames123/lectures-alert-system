@@ -34,14 +34,14 @@ export const login = async (req, res) => {
 
     // If successful, return user details
     return res.status(200).json({
-      message: 'Login successful',
+      message: 'Login successful!',
       user: {
         _id: user._id,
         indexNumber: user.indexNumber,
         fullName: user.fullName,
         contact: user.contact,
         classValue: user.classValue,
-        email: user.email,
+        email: user.email, 
         role: user.role,
       },
     });
