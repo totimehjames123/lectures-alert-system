@@ -32,7 +32,7 @@ const Notifications = ({ navigation }) => {
         throw new Error('Invalid response format');
       }
     } catch (err) {
-      console.error('Failed to fetch notifications:', err);
+      // console.error('Failed to fetch notifications:', err);
       setError('Failed to fetch notifications');
     } finally {
       setLoading(false);
@@ -88,7 +88,7 @@ const Notifications = ({ navigation }) => {
         }))
       );
     } catch (err) {
-      console.error('Failed to mark all notifications as read:', err);
+      // console.error('Failed to mark all notifications as read:', err);
     }
   };
 
