@@ -76,7 +76,7 @@ const Profile = ({ navigation }) => {
           <FormInput
             icon="grid-outline"
             label="Role"
-            value={user.role}
+            value={user.role === "Student" ? (user.role + " • " + user.classValue) : user.role}
             disabled={true}
             moreClass="mb-2"
           />
