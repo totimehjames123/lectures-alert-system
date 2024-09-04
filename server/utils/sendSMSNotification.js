@@ -1,6 +1,6 @@
 import axios from 'axios'; // Ensure axios is imported
 
-export const sendSMSNotification = async (phoneNumbers, message) => {
+const sendSMSNotification = async (phoneNumbers, message) => {
   try {
     const apiKey = process.env.SMS_KEY;
     if (!apiKey) {
@@ -24,3 +24,5 @@ export const sendSMSNotification = async (phoneNumbers, message) => {
     console.error('Error sending SMS:', error.message);
   }
 };
+
+export default sendSMSNotification 
